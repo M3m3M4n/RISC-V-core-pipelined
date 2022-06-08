@@ -40,7 +40,7 @@ module OpcodeDecoder (
             7'b1100111: controls = 14'b1_000_1_x_x_0_10_0_1_xx; // 103 - I-type jump link
             7'b1101111: controls = 14'b1_011_0_x_x_0_10_0_1_xx; // 111 - J-type
             // Branch and jump has to be 0 else will affect fetching
-            default:    controls = 14'bx_xxx_x_x_x_x_xx_0_0_xx; // non-implemented instruction
+            default:    controls = 14'b0_xxx_x_x_x_0_xx_0_0_xx; // non-implemented instruction
     endcase
 
 

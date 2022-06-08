@@ -30,9 +30,9 @@ module BranchDecoder (
                 4'b101: // bge >=
                     branch_o = (neg ^ overflow) ? 0 : 1;
                 4'b110: // bltu <  unsigned
-                    branch_o = carry ? 0 :1;
+                    branch_o = carry ? 1 : 0;
                 4'b111: // bgeu >= unsigned
-                    branch_o = (carry | zero) ? 1 : 0;
+                    branch_o = (carry | zero) ? 0 : 1;
                 default: branch_o = 1'bx;
             endcase
         end

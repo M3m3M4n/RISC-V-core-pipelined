@@ -26,7 +26,7 @@ module RegisterFile (
 
     always_ff @(negedge i_clk)
         if (i_we3) begin
-            regs[i_a3] <= i_wd3;
+            regs[i_a3] <= (i_a3 != 0) ? i_wd3 : 0;
         end
 
 endmodule

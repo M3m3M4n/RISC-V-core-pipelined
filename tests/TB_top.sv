@@ -35,7 +35,7 @@ initial begin
     $dumpvars(0, TB_Top);
     #5 rst = 0;
     #10 rst = 1;
-    #85
+    #1985
     $finish;
 end
 

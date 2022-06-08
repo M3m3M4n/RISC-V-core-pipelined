@@ -24,6 +24,7 @@ module Top (
     logic       m_en_regfile_write;
     logic       w_en_regfile_write;
     logic [1:0] e_mux_final_result_src;
+    logic [1:0] m_mux_final_result_src;
     logic       d_mux_alu_src_a;
     logic       d_mux_alu_src_b;
 
@@ -66,6 +67,7 @@ module Top (
         .i_de_clr(de_clr),
         .o_m_en_regfile_write(m_en_regfile_write),
         .o_w_en_regfile_write(w_en_regfile_write),
+        .o_m_mux_final_result_src(m_mux_final_result_src),
         .o_e_mux_final_result_src(e_mux_final_result_src),
         .o_d_mux_alu_src_a(d_mux_alu_src_a),
         .o_d_mux_alu_src_b(d_mux_alu_src_b)
@@ -111,6 +113,7 @@ module Top (
         .i_data_w_rd(w_rd),
         .i_ctrl_m_en_regfile_write(m_en_regfile_write),
         .i_ctrl_w_en_regfile_write(w_en_regfile_write),
+        .i_ctrl_m_mux_final_result_src(m_mux_final_result_src),
         .o_data_mux_alu_forward_src_a(mux_alu_forward_src_a),
         .o_data_mux_alu_forward_src_b(mux_alu_forward_src_b),
         .i_data_d_rs1(d_rs1),

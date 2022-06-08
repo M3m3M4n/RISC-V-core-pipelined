@@ -28,6 +28,7 @@ module ControlPipeline (
     //   Forward
     output logic       o_m_en_regfile_write,
     output logic       o_w_en_regfile_write,
+    output logic [1:0] o_m_mux_final_result_src,
     //   Stall
     output logic [1:0] o_e_mux_final_result_src,
     output logic       o_d_mux_alu_src_a,
@@ -91,6 +92,7 @@ module ControlPipeline (
     //   Hazard
     assign o_m_en_regfile_write     = m_en_regfile_write;
     assign o_w_en_regfile_write     = w_en_regfile_write;
+    assign o_m_mux_final_result_src = m_mux_final_result_src;
     assign o_e_mux_final_result_src = e_mux_final_result_src;
     assign o_d_mux_alu_src_a        = d_mux_alu_src_a;
     assign o_d_mux_alu_src_b        = d_mux_alu_src_b;

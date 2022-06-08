@@ -39,6 +39,7 @@ module HazardBlock (
     //   From control
     input  logic       i_ctrl_m_en_regfile_write,
     input  logic       i_ctrl_w_en_regfile_write,
+    input  logic [1:0] i_ctrl_m_mux_final_result_src,
     //   To data
     output logic [1:0] o_data_mux_alu_forward_src_a,
     output logic [1:0] o_data_mux_alu_forward_src_b,
@@ -67,7 +68,10 @@ module HazardBlock (
     always_comb begin
         // Rs1 mux
         if ((i_data_e_rs1 == i_data_m_rd) & (i_data_e_rs1 != 0) & (i_ctrl_m_en_regfile_write))
-            o_data_mux_alu_forward_src_a = 2'b10;
+            if (i_ctrl_m_mux_final_result_src == 2'b11)
+                o_data_mux_alu_forward_src_a = 2'b11;
+            else
+                o_data_mux_alu_forward_src_a = 2'b10;
         else
         if ((i_data_e_rs1 == i_data_w_rd) & (i_data_e_rs1 != 0) & (i_ctrl_w_en_regfile_write))
             o_data_mux_alu_forward_src_a = 2'b01;
@@ -87,17 +91,26 @@ module HazardBlock (
     logic _stall;
     // Stall detection logic
     always_comb begin
-        if (i_ctrl_e_mux_final_result_src == 2'b01) begin         // match load
-            if (i_data_e_rd == i_data_d_rs1 & ~i_data_e_rd) begin // will use and not 0 
-                if (~i_ctrl_d_mux_alu_src_a) // actually used
-                    _stall = 1'b1;
+        if (i_ctrl_e_mux_final_result_src == 2'b01) begin        // match load
+            if (i_data_e_rd != 0) begin // not 0
+                if (i_data_e_rd == i_data_d_rs1) begin // will use
+                    if (~i_ctrl_d_mux_alu_src_a) // actually used
+                        _stall = 1'b1;
+                    else
+                        _stall = 1'b0;
+                end
                 else
-                    _stall = 1'b0;
-            end
-            else
-            if (i_data_e_rd == i_data_d_rs2 & ~i_data_e_rd) begin
-                if (~i_ctrl_d_mux_alu_src_b) // actually used
+                if (i_data_e_rd == i_data_d_rs2) begin
+                    // Can't compare like this because write data line
+                    // comes directly from before mux, used for cases like:
+                    //      lw      a5,-20(s0)
+                    //      sw      a5,-24(s0)
+                    // if (~i_ctrl_d_mux_alu_src_b)  
+                    //     _stall = 1'b1;
+                    // else
+                    //     _stall = 1'b0;
                     _stall = 1'b1;
+                end
                 else
                     _stall = 1'b0;
             end

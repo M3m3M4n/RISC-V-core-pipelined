@@ -66,12 +66,14 @@ module DataPipeline (
     logic [31:0] m_mem_data;
     logic [31:0] m_pc_p_4;
     logic [4:0]  m_rd;
+    logic [31:0] m_immext;
     logic [31:0] m_memory_readout;
     // Writeback stage
     logic [31:0] w_memory_readout;
     logic [31:0] w_alu_result;
     logic [31:0] w_pc_p_4;
     logic [4:0]  w_rd;
+    logic [31:0] w_immext;
     logic [31:0] w_final_result;
     // Interconnect
     logic [31:0] pc_adder_result;
@@ -120,7 +122,8 @@ module DataPipeline (
         .i_rd2(e_rd2),
         .i_immext(e_immext),
         .i_pc(e_pc),
-        .i_m_e_foward_data(m_alu_result),
+        .i_m_e_foward_data_alu(m_alu_result),
+        .i_m_e_foward_data_immext(m_immext),
         .i_w_e_foward_data(w_final_result),
         .i_alu_control(i_alu_control),
         .i_mux_alu_src_a(i_mux_alu_src_a),
@@ -148,6 +151,7 @@ module DataPipeline (
         .i_alu_result(w_alu_result),
         .i_memory_readout(w_memory_readout),
         .i_pc_p_4(w_pc_p_4),
+        .i_immext(w_immext),
         .i_mux_final_result_src(i_mux_final_result_src),
         .o_wb(w_final_result)
     );
@@ -187,6 +191,7 @@ module DataPipeline (
         m_pc_p_4     <= e_pc_p_4;
         m_alu_result <= e_alu_result;
         m_mem_data   <= e_mem_data;
+        m_immext     <= e_immext;
     end
 
     always_ff @(posedge i_clk) begin : m2w
@@ -194,6 +199,7 @@ module DataPipeline (
         w_alu_result     <= m_alu_result;
         w_rd             <= m_rd;
         w_pc_p_4         <= m_pc_p_4;
+        w_immext         <= m_immext;
     end
     
 endmodule

@@ -7,41 +7,58 @@ module DataMemory (
     output logic [31:0] o_rd
 );
 
-    logic [31:0] RAM[63:0]; // 2K
+    logic [31:0] i_addr_p1, i_addr_p2, i_addr_p3;
+    assign i_addr_p1 = i_addr + 1;
+    assign i_addr_p2 = i_addr_p1 + 1;
+    assign i_addr_p3 = i_addr_p2 + 1;
+
+    logic [7:0] RAM[2047:0]; // 2K bytes, individually accessible
 
     // As this should not be synthesizable anyway...
     initial begin
-        for (int i = 0; i < 64; i=i+1)
-            RAM[i] = 32'h0;
+        for (int i = 0; i < 2048; i = i + 1)
+            RAM[i] = 8'h0;
     end
 
     always_comb begin // mask output
         case(i_mask_type)
             2'b00:
-                o_rd = i_ext_type ? {24'b0, RAM[i_addr][7:0]} : {{24{RAM[i_addr][7]}}, RAM[i_addr][7:0]};
+                o_rd = i_ext_type ? {24'b0, RAM[i_addr]} : {{24{RAM[i_addr][7]}}, RAM[i_addr]};
             2'b01:
-                o_rd = i_ext_type ? {16'b0, RAM[i_addr[31:1]][15:0]} : {{16{RAM[i_addr[31:1]][15]}}, RAM[i_addr[31:1]][15:0]};
-            // 2'b10: // is default 
-            default:  // full word read, no sign change
-                o_rd = RAM[i_addr[31:2]]; // word aligned
+                // o_rd = i_ext_type ? {16'b0, RAM[i_addr_p1:i_addr]} : {{16{RAM[i_addr_p1:i_addr][15]}}, RAM[i_addr_p1:i_addr]};
+                // Because icarus verilog sucks
+                o_rd = i_ext_type ? {16'b0, RAM[i_addr_p1], RAM[i_addr]} :
+                                    {{16{RAM[i_addr_p1][7]}}, RAM[i_addr_p1], RAM[i_addr]};
+            2'b10:
+                // o_rd = RAM[i_addr_p3:i_addr];
+                o_rd = {RAM[i_addr_p3], RAM[i_addr_p2], RAM[i_addr_p1], RAM[i_addr]};
+            default:
+                o_rd = 32'hx;
         endcase
     end
 
-    logic [31:0] _wd;
-
-    always_comb begin // mask input
-        case(i_mask_type)
-            2'b00:
-                _wd = i_ext_type ? {24'b0, i_wd[7:0]} : {{24{i_wd[7]}}, i_wd[7:0]};
-            2'b01:
-                _wd = i_ext_type ? {16'b0, i_wd[15:0]} : {{16{i_wd[15]}}, i_wd[15:0]};
-            // 2'b10: // is default 
-            default:  // full word read, no sign change
-                _wd = i_wd; // word aligned
-        endcase
+    always_ff @(posedge i_clk) begin
+        if (i_we) begin
+            case(i_mask_type)
+                2'b00:
+                    RAM[i_addr]    <= i_wd[7:0];
+                2'b01: begin
+                    // Because icarus verilog sucks
+                    // RAM[i_addr_p1:i_addr] <= i_wd[15:0];
+                    RAM[i_addr_p1] <= i_wd[15:8];
+                    RAM[i_addr]    <= i_wd[7:0];
+                end
+                2'b10: begin
+                    // RAM[i_addr_p3:i_addr] <= i_wd;
+                    RAM[i_addr_p3] <= i_wd[31:24];
+                    RAM[i_addr_p2] <= i_wd[23:16];
+                    RAM[i_addr_p1] <= i_wd[15:8];
+                    RAM[i_addr]    <= i_wd[7:0];
+                end
+                default:
+                    begin /* Do nothing */ end
+            endcase
+        end
     end
-
-    always_ff @(posedge i_clk)
-        if (i_we) RAM[i_addr[31:2]] <= _wd;
 
 endmodule
