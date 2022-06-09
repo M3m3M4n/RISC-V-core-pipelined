@@ -67,11 +67,15 @@ module HazardBlock (
     // Forward logic
     always_comb begin
         // Rs1 mux
-        if ((i_data_e_rs1 == i_data_m_rd) & (i_data_e_rs1 != 0) & (i_ctrl_m_en_regfile_write))
+        if ((i_data_e_rs1 == i_data_m_rd) & (i_data_e_rs1 != 0) & (i_ctrl_m_en_regfile_write)) begin
+            // for cases where imm need to be fowarded:
+            // lui     a5,0x00000
+            // addi    a5,a5,-1
             if (i_ctrl_m_mux_final_result_src == 2'b11)
                 o_data_mux_alu_forward_src_a = 2'b11;
             else
                 o_data_mux_alu_forward_src_a = 2'b10;
+        end
         else
         if ((i_data_e_rs1 == i_data_w_rd) & (i_data_e_rs1 != 0) & (i_ctrl_w_en_regfile_write))
             o_data_mux_alu_forward_src_a = 2'b01;
